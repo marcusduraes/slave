@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import designation from './src/utils/designation.js';
+import getIPAddress from './src/utils/ip.js';
 
 const { SERVER_URL, SERVER_LOGIN, SERVER_PASSWORD, CODE } = process.env;
 
@@ -41,7 +42,7 @@ async function fetchAndProcessIframeData() {
 
   await iframe.waitForSelector('::-p-xpath(/html/body/div[4]/div[2])');
 
-  await new Promise((resolve, reject) => setTimeout(resolve, 1500))
+  await new Promise((resolve, reject) => setTimeout(resolve, 1500));
 
   const list = new Set();
 
@@ -58,21 +59,23 @@ async function fetchAndProcessIframeData() {
     filteredTable[key] = designation(value);
   }
 
-  if (!list.size) 
-    filteredTable.forEach(item => list.add(item));
+  if (!list.size) filteredTable.forEach(item => list.add(item));
 
-  filteredTable.forEach(item => {
+  filteredTable.forEach(async item => {
     if (!list.has(item)) {
       list.add(item);
       // obter ip pingar e enviar mensagem
+      try {
+        const {ip, mask} = await getIPAddress(item);
+        console.log(ip, mask);
+      } catch (error) {
+        //
+      }
     }
-  })
+  });
 
-  console.log(list)
-
+  console.log(list);
 }
 fetchAndProcessIframeData();
 
 setInterval(fetchAndProcessIframeData, 30000);
-
-
