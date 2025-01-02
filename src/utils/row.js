@@ -1,4 +1,4 @@
-import getDataSheet from './src/utils/sheets/get.js';
+import getDataSheet from "./sheets/get.js";
 
 const { SHEETNAME } = process.env
 

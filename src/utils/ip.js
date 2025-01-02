@@ -1,10 +1,11 @@
-import getRowTarget from './row';
-import getDataSheet from './sheets/get';
-import insertDataSheet from './sheets/insert';
+import ip from 'ip';
+import getRowTarget from './row.js';
+import getDataSheet from './sheets/get.js';
+import insertDataSheet from './sheets/insert.js';
 
 const { SHEETNAME } = process.env;
 
-export default async function getIPAddress(designation) {
+export async function getIPAddress(designation) {
   const rowTarget = await getRowTarget();
   await insertDataSheet(`${SHEETNAME}!F${rowTarget}`, [[designation]]);
 
@@ -15,5 +16,11 @@ export default async function getIPAddress(designation) {
   mask = mask && mask.values && mask.values.length > 0 ? mask.values[0][0] : null;
 
   if (ip === null || mask === null) return;
-  else return { ip, mask };
+  else return getFirewallIPAddress(ip, mask);
+}
+
+function getFirewallIPAddress(ipAddress, maskAddress) {
+  const prefix = ip.subnet(ipAddress, maskAddress).subnetMaskLength;
+  const subnet = ip.cidrSubnet(`${ipAddress}/${prefix}`);
+  return subnet.lastAddress;
 }
